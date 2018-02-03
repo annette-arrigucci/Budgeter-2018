@@ -1,0 +1,238 @@
+﻿@using Microsoft.AspNet.Identity
+@using Budgeter.Models
+
+@{
+    ViewBag.Title = "Dashboard";
+}
+
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css">
+<link rel="stylesheet" href="~/Content/dashboard-style.css">
+
+
+
+<div class="container">
+    <div class="row">
+        <h2>@ViewBag.DashboardName</h2>
+        <div class="col-md-11">
+            <div class="budget-chart">
+                <h3>Spending vs. Budget by Category</h3>
+
+                @if (ViewBag.HasBudget == true)
+                {
+                    <div id="categories-spending-bar" style="height: 250px;"></div>
+                }
+                else
+                {
+                    <div>No budget found for household this month</div>
+                }
+            </div>
+          </div>
+        </div>
+    <div class="row">
+        <div class="col-md-7">
+            <div class="budget-chart">
+               <div class="row">
+                <div class="col-md-4">
+                    <div class="box-body">
+                        <h3>Accounts/Balances</h3>
+                        @if (ViewBag.HasAccounts == true)
+                        {
+                            var accounts = new List<Account>();
+                            accounts = ViewBag.Accounts;
+                            @Html.Partial("_AccountBalances", accounts)
+                        }
+                        else
+                        {
+                            @Html.Raw("No accounts found for this household");
+                        }
+                    </div>
+                </div>
+                    <div class="col-md-7 col-md-offset-1">
+                        <div class="box-body">
+                            <h3>Recent Transactions</h3>
+                            @if (ViewBag.HasTransactions == true)
+                            {
+                                var recentTrans = new List<TransactionsIndexViewModel>();
+                                recentTrans = ViewBag.RecentTransactions;
+                                @Html.Partial("_RecentTransactions", recentTrans);
+                            }
+                            else
+                            {
+                                @Html.Raw("No transactions found this month for this household");
+                            }
+                       </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @*<div class="col-md-3">
+            <h3>Accounts/Balances</h3>
+            @if (ViewBag.HasAccounts == true)
+            {
+                var accounts = new List<Account>();
+                accounts = ViewBag.Accounts;
+                @Html.Partial("_AccountBalances", accounts)
+            }
+            else
+            {
+                @Html.Raw("No accounts found for this household");
+            }
+        </div>*@
+        @*<div class="col-md-3">
+            <h3>Recent Transactions</h3>
+            @if(ViewBag.HasTransactions == true)
+            {
+                var recentTrans = new List<TransactionsIndexViewModel>();
+                recentTrans = ViewBag.RecentTransactions;
+                @Html.Partial("_RecentTransactions", recentTrans);
+            }
+            else
+            {
+                @Html.Raw("No transactions found this month for this household");
+            }
+        </div>*@
+
+        @*<div class="row">
+            <div class="col-md-3">
+                <div class="box box-success">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Recent Transactions</h3>
+                    </div>
+                    <div class="box-body">
+                        @if (ViewBag.HasTransactions == true)
+                        {
+                            var recentTrans = new List<TransactionsIndexViewModel>();
+                            recentTrans = ViewBag.RecentTransactions;
+                            @Html.Partial("_RecentTransactions", recentTrans);
+                        }
+                        else
+                        {
+                            @Html.Raw("No transactions found this month for this household");
+                        }
+                    </div>
+                </div>
+            </div>*@
+
+
+            <div class="col-md-4">
+                <h3 class="budget-chart-title">Total Spending vs. Budget</h3>
+                @if (ViewBag.HasBudget == true)
+            {
+                    <div id="budget-spending-bar" style="height: 250px;"></div>
+                }
+                else
+                {
+                    <div>No budget found for household this month</div>
+                }
+            </div>
+
+        </div>
+    <div class="row">
+        
+            @if (ViewBag.HasTransactions == true)
+            {
+                <div class="col-md-3">
+                    <h3 class="budget-chart-title">Income Transactions</h3>
+                        <div id="income-categories-pie" style="height: 250px;"></div>
+                    </div>
+                <div class="col-md-4">
+                    <div class="budget-chart">
+                        <h3>Income vs. Spending</h3>
+                        <div id="income-spending-bar" style="height: 250px;"></div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <h3 class="budget-chart-title">Expense Transactions</h3>
+                        <div id="expense-categories-pie" style="height: 250px;"></div>
+                    </div>
+            }
+            else
+            {
+                <div></div>
+            }
+    </div>
+</div>
+@section scripts{
+    <script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
+    <script>
+        $(function () {
+            $.post('@Url.Action("GetCategoriesChart", "Home")').then(function (response) {
+                new Morris.Bar({
+                    element: 'categories-spending-bar',
+                    data: response,
+                    xkey: 'y',
+                    ykeys: ['a', 'b'],
+                    labels: ['Spending', 'Budget'],
+                    resize: true,
+                })
+            });
+            $.post('@Url.Action("GetBudgetSpendingChart","Home")').then(function (response) {
+                new Morris.Bar({
+                    element: 'budget-spending-bar',
+                    data: response,
+                    xkey: 'y',
+                    ykeys: ['a'],
+                    labels: ['Totals'],
+                    resize: true
+                })
+            });
+            $.post('@Url.Action("GetIncomeExpenseChart","Home")').then(function (response) {
+                new Morris.Bar({
+                    element: 'income-spending-bar',
+                    data: response,
+                    xkey: 'y',
+                    ykeys: ['a'],
+                    labels: ['Totals'],
+                    resize: true             
+                })
+            });
+            $.post('@Url.Action("GetExpenseChart","Home")').then(function (response) {
+                new Morris.Donut({
+                    element: 'expense-categories-pie',
+                    data: response,
+                    resize: true
+                })
+            });
+            $.post('@Url.Action("GetIncomeChart","Home")').then(function (response) {
+                new Morris.Donut({
+                    element: 'income-categories-pie',
+                    data: response,
+                    resize: true
+                })
+            });
+        });
+
+        @*$(function () {
+            $.post('@Url.Action("GetIncomeExpenseChart","Home")').then(function (response) {
+                new Morris.Donut({
+                    element: 'income-spending-bar',
+                    data: response,
+                    resize: true
+                })
+            })
+        });*@
+        //Morris.Bar({
+        //    element: 'categories-spending-bar',
+        //    data: [
+        //      { y: '2006', a: 100, b: 90 },
+        //      { y: '2007', a: 75,  b: 65 },
+        //      { y: '2008', a: 50,  b: 40 },
+        //      { y: '2009', a: 75,  b: 65 },
+        //      { y: '2010', a: 50,  b: 40 },
+        //      { y: '2011', a: 75,  b: 65 },
+        //      { y: '2012', a: 100, b: 90 },
+        //      { y: '2013', a: 100, b: 90 },
+        //      { y: '2014', a: 75,  b: 65 },
+        //      { y: '2015', a: 50,  b: 40 },
+        //      { y: '2016', a: 75,  b: 65 },
+        //      { y: '2017', a: 50,  b: 40 },
+        //      { y: '2018', a: 75,  b: 65 },
+        //      { y: '2019', a: 100, b: 90 }
+        //    ],
+        //    xkey: 'y',
+        //    ykeys: ['a', 'b'],
+        //    labels: ['Spending', 'Budget']
+        //});
+    </script>
+}

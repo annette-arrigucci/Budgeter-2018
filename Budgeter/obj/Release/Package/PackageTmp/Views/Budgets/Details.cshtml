@@ -1,0 +1,191 @@
+﻿@model Budgeter.Models.BudgetItemsIndexViewModel
+@using Budgeter.Models
+@{
+    ViewBag.Title = "Details";
+}
+
+<link rel="stylesheet" href="~/JQuery-UI/jquery-ui.min.css">
+<link href="~/Content/transaction-form-style.css" rel="stylesheet">
+
+
+<h2>@ViewBag.BudgetName</h2>
+<div class="container">
+    <div class="row">   
+        <div class="col-lg-5">
+            <h4>
+                Budget totals: Income $@ViewBag.IncomesTotal            
+                @Html.Raw(" | ")
+                Expenses $@ViewBag.ExpensesTotal
+            </h4>
+        </div>
+        <div class="col-lg-7">
+            <h4>
+                @if (ViewBag.ExpensesTotal > ViewBag.IncomesTotal)
+                {
+                    <span class="overdrawn">Warning: Budgeted expenses exceed income</span>
+                }
+            </h4>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-8">
+            <br />
+            <p>
+                @Html.ActionLink("Create Budget Item", "Details", "Budgets", new { id = ViewBag.BudgetId }, null)
+            </p>
+            <br />
+            <h4>Income</h4>
+            <table class="table">
+                <tr>
+                    <th></th>
+                    <th>
+                        @Html.Label("Description")
+                    </th>
+                    <th>
+                        @Html.Label("Category")
+                    </th>
+                    <th>
+                        @Html.Label("Amount")
+                    </th>
+                    <th>
+                        @Html.Label("Repeats every month")
+                    </th>
+                </tr>
+                @foreach (var item in Model.IncomeItems)
+                {
+                    <tr>
+                        <td><a href="#" id="@item.Id" class="delete icon-space" title="Delete"><i class="fa fa-trash"></i></a></td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Description)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.CategoryName)
+                        </td>
+                        <td>
+                            $@item.Amount
+                        </td>
+                        <td>
+                            @if (item.IsRepeating == true)
+                            {
+                                @Html.Raw("Yes")
+                            }
+                            else
+                            {
+                                @Html.Raw("No")
+                            }
+                        </td>
+                    </tr>
+                }
+            </table>
+            <h4>Expenses</h4>
+            <table class="table">
+                <tr>
+                    <th></th>
+                    <th>
+                        @Html.Label("Description")
+                    </th>
+                    <th>
+                        @Html.Label("Category")
+                    </th>
+                    <th>
+                        @Html.Label("Amount")
+                    </th>
+                    <th>
+                        @Html.Label("Repeats every month")
+                    </th>
+                </tr>
+                @foreach (var item in Model.ExpenseItems)
+                {
+                    <tr>
+                        <td><a href="#" id="@item.Id" class="delete icon-space" title="Delete"><i class="fa fa-trash"></i></a></td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Description)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.CategoryName)
+                        </td>
+                        <td>
+                            $@item.Amount
+                        </td>
+                        <td>
+                            @if (item.IsRepeating == true)
+                            {
+                                @Html.Raw("Yes")
+                            }
+                            else
+                            {
+                                @Html.Raw("No")
+                            }
+                        </td>
+                    </tr>
+                }
+            </table>
+        </div>
+        <div class="col-lg-3">
+            <div id="form-placeholder">
+                @{ 
+                    var createItemModel = new BudgetItemViewModel();
+                    createItemModel = ViewBag.CreateModel;
+                }
+                @Html.Partial("_CreateBudgetItem", createItemModel)
+           </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script src="~/JQuery-UI/jquery-ui.min.js"></script>   
+    <script type="text/javascript">
+        //hide/show dropdown depending on which radio button is selected
+        $(document).on('focus', '#form-placeholder', function () {
+            if ($('#budget-radio-income').is(':checked')) {
+                $("#budget-expense-dropdown").hide();
+                $("#budget-income-dropdown").show();
+            }
+            if ($('#budget-radio-expense').is(':checked')) {
+                $("#budget-income-dropdown").hide();
+                $("#budget-expense-dropdown").show();
+            }
+        });
+        //started out using autocomplete but decided to use dropdown instead
+        @*$("#categoryselect").autocomplete({
+            source:
+                '@Url.Action("ExpenseSearch")'
+        });*@
+
+        @*$('#categoryselect').click(function() {
+            if ($('#radio-income').is(':checked'))
+            {
+                $("#categoryselect").autocomplete({
+                    source: '@Url.Action("IncomeSearch")'
+                });
+            }
+        });
+        $('#categoryselect').click(function () {
+            if ($('#radio-expense').is(':checked'))
+            {
+                $("#categoryselect").autocomplete({
+                    source: '@Url.Action("ExpenseSearch")'
+                });
+            }
+        });*@
+
+        $(".delete").click(function () {
+            $("#form-placeholder").empty();
+            var myId = $(this).attr('id');
+            $("#form-placeholder").load("/BudgetItems/GetView", { id: myId, viewName: "_DeleteBudgetItem" });
+        });
+
+        //$(".create").click(function () {
+        //    $("#form-placeholder").empty();
+        //    var myId = $(this).attr('id');
+        //    $("#form-placeholder").load("/BudgetItems/GetCreateView", { budgetId: myId });
+        //});
+
+    //$(document).ready(function () {
+    //    $(".delete").click(function () {
+    //        $("#restore-transaction-placeholder").empty();
+    //        var myId = $(this).attr('id');
+    //        $("#restore-transaction-placeholder").load("/Transactions/GetView", { transactionId: myId, viewName: "_RestoreTransaction" });
+    //    });
+</script>
+}

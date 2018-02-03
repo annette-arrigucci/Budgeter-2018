@@ -1,0 +1,79 @@
+﻿@model IEnumerable<Budgeter.Models.TransactionsIndexViewModel>
+@using Budgeter.Models
+<link href="~/Content/transaction-form-style.css" rel="stylesheet">
+@{
+    ViewBag.Title = "Voided Transactions";
+}
+<h2>Voided Transactions - @ViewBag.AccountName</h2>
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8">
+            <table class="table">
+                <tr>
+                    <th></th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.DateSpent)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Description)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Category)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Amount)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.ReconciledAmount)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.EnteredBy)
+                    </th>
+                </tr>
+                @foreach (var item in Model)
+            {
+                    <tr>
+                        <td>
+                            <a href="#" id="@item.Id" class="restore">Restore</a>
+                        </td>
+                        <td>
+                            @item.DateSpent.ToString("M/d/yyyy")
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Description)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Category)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Amount)
+                        </td>
+
+                        <td>
+                            @Html.DisplayFor(modelItem => item.ReconciledAmount)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.EnteredBy)
+                        </td>
+                    </tr>
+                }
+
+            </table>
+        </div>
+        <div class="col-lg-4">
+            <div id="restore-transaction-placeholder">
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script type="text/javascript">
+    $(document).ready(function () {
+        $(".restore").click(function () {
+            $("#restore-transaction-placeholder").empty();
+            var myId = $(this).attr('id');
+            $("#restore-transaction-placeholder").load("/Transactions/GetView", { transactionId: myId, viewName: "_RestoreTransaction" });
+        });
+});
+    </script>
+}
